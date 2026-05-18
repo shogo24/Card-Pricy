@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { X, Loader } from 'lucide-react';
+import Image from 'next/image';
 import { MTGCard } from '@/lib/types';
 import { useAppStore } from '@/lib/store';
 import { formatPrice } from '@/lib/currency';
@@ -13,16 +14,16 @@ interface CardVariationsModalProps {
 
 export default function CardVariationsModal({ cardName, onClose, onSelectVariation }: CardVariationsModalProps) {
   const [variations, setVariations] = useState<MTGCard[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadedCardName, setLoadedCardName] = useState('');
   const { currency } = useAppStore();
+  const loading = cardName !== loadedCardName;
 
   useEffect(() => {
-    setLoading(true);
     fetch(`/api/search?q=${encodeURIComponent(cardName)}`)
       .then(r => r.json())
       .then(data => setVariations(data.cards || []))
       .catch(() => setVariations([]))
-      .finally(() => setLoading(false));
+      .finally(() => setLoadedCardName(cardName));
   }, [cardName]);
 
   return (
@@ -81,11 +82,13 @@ export default function CardVariationsModal({ cardName, onClose, onSelectVariati
                   }}
                 >
                   <div style={{ position: 'relative', paddingTop: '139%', background: 'var(--cream-dark)', width: '100%' }}>
-                    <img
+                    <Image
                       src={card.imageUrl}
                       alt={card.name}
-                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      fill
+                      sizes="140px"
+                      style={{ objectFit: 'cover' }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
                   </div>
                   <div style={{ padding: '8px 10px 10px' }}>

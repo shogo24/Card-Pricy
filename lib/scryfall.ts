@@ -5,6 +5,54 @@ import { MTGCard, VendorPrice, CardLegality } from './types';
 
 const BASE = 'https://api.scryfall.com';
 
+interface ScryfallPriceMap {
+  usd?: string | null;
+  usd_foil?: string | null;
+  eur?: string | null;
+}
+
+interface ScryfallLegalities {
+  commander?: string;
+  modern?: string;
+  legacy?: string;
+  vintage?: string;
+  pioneer?: string;
+  standard?: string;
+}
+
+interface ScryfallCard {
+  id: string;
+  name: string;
+  set_name?: string;
+  set?: string;
+  collector_number?: string;
+  image_uris?: { normal?: string };
+  card_faces?: Array<{ image_uris?: { normal?: string }; oracle_text?: string; mana_cost?: string; colors?: string[] }>;
+  type_line?: string;
+  oracle_text?: string;
+  released_at?: string;
+  rarity?: MTGCard['rarity'];
+  artist?: string;
+  mana_cost?: string;
+  colors?: string[];
+  flavor_name?: string;
+  prices?: ScryfallPriceMap;
+  purchase_uris?: { tcgplayer?: string; cardmarket?: string };
+  legalities?: ScryfallLegalities;
+  foil?: boolean;
+  nonfoil?: boolean;
+  scryfall_uri?: string;
+}
+
+interface ScryfallSearchResponse {
+  data?: ScryfallCard[];
+}
+
+interface ScryfallCollectionResponse {
+  data?: ScryfallCard[];
+  not_found?: Array<{ name?: string }>;
+}
+
 // Scryfall rate-limit: 50–100ms between requests. We add a small delay utility.
 let lastCall = 0;
 async function rateLimitedFetch(url: string): Promise<Response> {
@@ -19,8 +67,7 @@ async function rateLimitedFetch(url: string): Promise<Response> {
 // ------------------------------------------------------------------
 // Shape a raw Scryfall card object into our MTGCard type
 // ------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function scryfallToCard(raw: any): MTGCard {
+function scryfallToCard(raw: ScryfallCard): MTGCard {
   // Build prices array from Scryfall's USD/EUR prices
   const prices: VendorPrice[] = [];
 
@@ -78,7 +125,7 @@ function scryfallToCard(raw: any): MTGCard {
   return {
     id: raw.id,
     name: raw.name,
-    set: raw.set_name,
+    set: raw.set_name || '',
     setCode: raw.set?.toUpperCase() || '',
     collectorNumber: raw.collector_number || '',
     imageUrl: raw.image_uris?.normal || raw.card_faces?.[0]?.image_uris?.normal || '',
@@ -104,7 +151,7 @@ export async function scryfallAutocomplete(query: string): Promise<string[]> {
   try {
     const res = await rateLimitedFetch(`${BASE}/cards/autocomplete?q=${encodeURIComponent(query)}`);
     if (!res.ok) return [];
-    const data = await res.json();
+    const data: { data?: string[] } = await res.json();
     return data.data || [];
   } catch {
     return [];
@@ -119,8 +166,7 @@ export async function scryfallSearch(query: string): Promise<MTGCard[]> {
   try {
     const res = await rateLimitedFetch(`${BASE}/cards/search?q=${encodeURIComponent(query)}&order=released&unique=prints`);
     if (!res.ok) return [];
-    const data = await res.json();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: ScryfallSearchResponse = await res.json();
     return (data.data || []).map(scryfallToCard);
   } catch {
     return [];
@@ -139,10 +185,10 @@ export async function scryfallSearchByName(query: string): Promise<MTGCard[]> {
       // Fallback to fuzzy
       const fuzzy = await rateLimitedFetch(`${BASE}/cards/search?q=${encodeURIComponent(query)}&unique=prints`);
       if (!fuzzy.ok) return [];
-      const d = await fuzzy.json();
+      const d: ScryfallSearchResponse = await fuzzy.json();
       return (d.data || []).map(scryfallToCard);
     }
-    const data = await res.json();
+    const data: ScryfallSearchResponse = await res.json();
     return (data.data || []).map(scryfallToCard);
   } catch {
     return [];
@@ -173,10 +219,10 @@ export async function scryfallGetByExactName(name: string): Promise<MTGCard | nu
       // Try fuzzy
       const fuzzy = await rateLimitedFetch(`${BASE}/cards/named?fuzzy=${encodeURIComponent(name)}`);
       if (!fuzzy.ok) return null;
-      const data = await fuzzy.json();
+      const data: ScryfallCard = await fuzzy.json();
       return scryfallToCard(data);
     }
-    const data = await res.json();
+    const data: ScryfallCard = await res.json();
     return scryfallToCard(data);
   } catch {
     return null;
@@ -209,23 +255,16 @@ export async function scryfallBulkSearch(names: string[]): Promise<{ found: MTGC
         missing.push(...chunk);
         continue;
       }
-      const data = await res.json();
+      const data: ScryfallCollectionResponse = await res.json();
       const foundNames = new Set<string>();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const card of (data.data || [])) {
         found.push(scryfallToCard(card));
         foundNames.add(card.name.toLowerCase());
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const notFound of (data.not_found || [])) {
         missing.push(notFound.name || 'Unknown');
       }
-      // Any chunk names not in found or not_found
-      for (const name of chunk) {
-        if (!foundNames.has(name.toLowerCase()) && !data.not_found?.some((nf: any) => nf.name?.toLowerCase() === name.toLowerCase())) {
-          // It was found — already handled
-        }
-      }
+      void foundNames;
     } catch {
       missing.push(...chunk);
     }

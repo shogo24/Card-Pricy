@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { Search, Clock, Database, Loader } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAppStore } from '@/lib/store';
-import { formatPrice } from '@/lib/currency';
 
 export default function HomePage() {
   const router = useRouter();
@@ -13,7 +12,7 @@ export default function HomePage() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const { recentSearches, currency } = useAppStore();
+  const { recentSearches } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

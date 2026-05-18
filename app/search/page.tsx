@@ -15,15 +15,13 @@ function SearchResults() {
   const { addRecentSearch } = useAppStore();
 
   const [cards, setCards] = useState<MTGCard[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadedQuery, setLoadedQuery] = useState('');
   const [error, setError] = useState('');
   const [selectedCard, setSelectedCard] = useState<MTGCard | null>(null);
+  const loading = q !== loadedQuery;
 
   useEffect(() => {
     if (!q) return;
-    setLoading(true);
-    setError('');
-    setCards([]);
     fetch(`/api/search?q=${encodeURIComponent(q)}`)
       .then(r => r.json())
       .then(data => {
@@ -37,8 +35,8 @@ function SearchResults() {
         }
       })
       .catch(() => setError('Failed to fetch results. Please try again.'))
-      .finally(() => setLoading(false));
-  }, [q]);
+      .finally(() => setLoadedQuery(q));
+  }, [q, addRecentSearch]);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
@@ -74,7 +72,7 @@ function SearchResults() {
 
         {!loading && !error && cards.length === 0 && q && (
           <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: 18, marginBottom: 8 }}>No cards found for "{q}"</p>
+            <p style={{ fontSize: 18, marginBottom: 8 }}>No cards found for &quot;{q}&quot;</p>
             <p style={{ fontSize: 14 }}>Try a different search term or check spelling</p>
           </div>
         )}

@@ -12,12 +12,12 @@ export default function CardPage() {
   const id = params.id as string;
 
   const [card, setCard] = useState<MTGCard | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadedId, setLoadedId] = useState('');
   const [error, setError] = useState('');
+  const loading = Boolean(id) && id !== loadedId;
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
     fetch(`/api/card/${id}`)
       .then(r => {
         if (!r.ok) throw new Error('Not found');
@@ -25,7 +25,7 @@ export default function CardPage() {
       })
       .then(data => setCard(data.card))
       .catch(() => setError('Card not found or failed to load.'))
-      .finally(() => setLoading(false));
+      .finally(() => setLoadedId(id));
   }, [id]);
 
   return (

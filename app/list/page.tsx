@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Trash2, Copy, Download, Check } from 'lucide-react';
+import { ArrowLeft, Trash2, Copy, Download } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAppStore } from '@/lib/store';
 import { formatPrice, convertPrice, convertCurrencyPrice } from '@/lib/currency';

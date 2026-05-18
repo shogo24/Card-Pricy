@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { List } from 'lucide-react';
+import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
 import { Currency } from '@/lib/types';
 
@@ -14,7 +15,7 @@ export default function Navbar() {
     <nav style={{ background: 'var(--card-bg)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 50 }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/CardPricyLogo.png" alt="Card Pricy Logo" style={{ width: 28, height: 28 }} />
+          <Image src="/CardPricyLogo.png" alt="Card Pricy Logo" width={28} height={28} priority />
           <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 20, color: 'var(--crimson)' }}>Card Pricy</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>

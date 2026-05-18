@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, AlertTriangle, Loader } from 'lucide-react';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import CardDetails from '@/components/CardDetails';
 import CardVariationsModal from '@/components/CardVariationsModal';
@@ -14,17 +15,18 @@ function BulkResults() {
   const params = useSearchParams();
   const raw = params.get('q') || '';
   const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
+  const hasQuery = raw.trim().length > 0;
 
   const [found, setFound] = useState<MTGCard[]>([]);
   const [missing, setMissing] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadedRaw, setLoadedRaw] = useState('');
   const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<MTGCard | null>(null);
   const { currency } = useAppStore();
+  const loading = hasQuery && raw !== loadedRaw;
 
   useEffect(() => {
-    if (names.length === 0) { setLoading(false); return; }
-    setLoading(true);
+    if (names.length === 0) return;
     fetch('/api/bulk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,8 +38,8 @@ function BulkResults() {
         setMissing(data.missing || []);
       })
       .catch(() => setMissing(names))
-      .finally(() => setLoading(false));
-  }, [raw]);
+      .finally(() => setLoadedRaw(raw));
+  }, [raw, names]);
 
   // Group cards by name and get one representative per name
   const uniqueCards = Array.from(
@@ -54,7 +56,11 @@ function BulkResults() {
 
         <h1 className="font-display" style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Bulk Search Results</h1>
 
-        {loading ? (
+        {!hasQuery ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: 18 }}>Enter one or more card names to start a bulk search.</p>
+          </div>
+        ) : loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: 16, color: 'var(--text-muted)' }}>
             <Loader size={32} className="animate-spin" style={{ color: 'var(--crimson)' }} />
             <p style={{ fontSize: 15 }}>Resolving {names.length} card{names.length !== 1 ? 's' : ''} via Scryfall...</p>
@@ -114,11 +120,13 @@ function BulkResults() {
                       }}
                     >
                       <div style={{ position: 'relative', paddingTop: '139%', background: 'var(--cream-dark)', width: '100%' }}>
-                        <img
+                        <Image
                           src={card.imageUrl}
                           alt={card.name}
-                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          fill
+                          sizes="160px"
+                          style={{ objectFit: 'cover' }}
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                         />
                       </div>
                       <div style={{ padding: '10px 12px 12px' }}>

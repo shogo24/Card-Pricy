@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { X, Plus, Minus, ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
 import { MTGCard, Condition } from '@/lib/types';
 import { useAppStore } from '@/lib/store';
 import { formatPrice } from '@/lib/currency';
@@ -41,14 +42,24 @@ export default function CardDetails({ card, onClose, isModal }: CardDetailsProps
 
   const legalities = Object.entries(card.legalities);
 
+  const handleVendorSelect = (vendor: string, inStock: boolean) => {
+    if (inStock) {
+      setSelectedVendor(vendor);
+    }
+    setCustomPrice('');
+  };
+
   const container = (
     <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 32, height: '100%' }}>
       <div>
-        <img
+        <Image
           src={card.imageUrl}
           alt={card.name}
-          style={{ width: '100%', borderRadius: 16, boxShadow: 'var(--shadow-lg)' }}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          width={280}
+          height={392}
+          sizes="280px"
+          style={{ width: '100%', height: 'auto', borderRadius: 16, boxShadow: 'var(--shadow-lg)' }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
       </div>
 
@@ -116,7 +127,7 @@ export default function CardDetails({ card, onClose, isModal }: CardDetailsProps
               return (
                 <button
                   key={p.vendor}
-                  onClick={() => { p.inStock && setSelectedVendor(p.vendor); setCustomPrice(''); }}
+                  onClick={() => handleVendorSelect(p.vendor, p.inStock)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '10px 14px', borderRadius: 10, border: '2px solid',

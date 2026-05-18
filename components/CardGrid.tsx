@@ -46,11 +46,13 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
             }}
           >
             <div style={{ position: 'relative', paddingTop: '139%', background: 'var(--cream-dark)', width: '100%' }}>
-              <img
+              <Image
                 src={card.imageUrl}
                 alt={card.name}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                fill
+                sizes="(max-width: 768px) 50vw, 160px"
+                style={{ objectFit: 'cover' }}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
               <div style={{
                 position: 'absolute', top: 8, right: 8,
