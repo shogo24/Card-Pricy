@@ -159,14 +159,20 @@ export default function HomePage() {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {[
-                  { name: 'Scryfall', status: 'live' },
-                  { name: 'TCGPlayer', status: 'via Scryfall' },
-                  { name: 'Cardmarket', status: 'via Scryfall' },
+                  { name: 'Scryfall', status: 'live', href: 'https://scryfall.com/' },
+                  { name: 'TCGPlayer', status: 'via Scryfall', href: 'https://www.tcgplayer.com/' },
+                  { name: 'Cardmarket', status: 'via Scryfall', href: 'https://www.cardmarket.com/' },
                 ].map(src => (
-                  <span key={src.name} style={{ padding: '4px 12px', borderRadius: 99, background: 'var(--cream)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)' }}>
+                  <a
+                    key={src.name}
+                    href={src.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    style={{ padding: '4px 12px', borderRadius: 99, background: 'var(--cream)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                  >
                     <span style={{ fontWeight: 700 }}>{src.name}</span>
                     <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>· {src.status}</span>
-                  </span>
+                  </a>
                 ))}
               </div>
             </div>

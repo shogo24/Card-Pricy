@@ -17,7 +17,12 @@ const RARITY_COLOR: Record<string, string> = {
 };
 
 export default function CardGrid({ cards, onCardClick }: CardGridProps) {
-  const { currency } = useAppStore();
+  const { currency, list } = useAppStore();
+
+  const listCounts = list.reduce((acc, entry) => {
+    acc[entry.card.id] = (acc[entry.card.id] || 0) + entry.quantity;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="stagger-children" style={{
@@ -28,6 +33,7 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
       {cards.map((card) => {
         const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
         const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;
+        const listCount = listCounts[card.id] || 0;
         return (
           <button
             key={card.id}
@@ -36,6 +42,7 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
             style={{
               background: 'var(--card-bg)',
               border: '1px solid var(--border)',
+              borderColor: listCount > 0 ? 'rgba(139,26,43,0.35)' : 'var(--border)',
               borderRadius: 12,
               overflow: 'hidden',
               cursor: 'pointer',
@@ -54,8 +61,16 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
                 style={{ objectFit: 'cover' }}
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
+              {listCount > 0 && (
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(139,26,43,0.10) 0%, rgba(139,26,43,0.03) 35%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+              )}
+              {listCount > 0 && (
+                <div style={{ position: 'absolute', top: 8, right: 8, padding: '4px 8px', borderRadius: 999, background: 'rgba(139,26,43,0.92)', color: '#fff', fontSize: 11, fontWeight: 700, boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }}>
+                  In list · x{listCount}
+                </div>
+              )}
               <div style={{
-                position: 'absolute', top: 8, right: 8,
+                position: 'absolute', top: 8, left: 8,
                 background: RARITY_COLOR[card.rarity],
                 width: 8, height: 8, borderRadius: '50%',
                 boxShadow: '0 0 4px currentColor',

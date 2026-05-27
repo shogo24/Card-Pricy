@@ -27,15 +27,23 @@ const LEGALITY_COLORS: Record<string, { bg: string; text: string }> = {
 
 export default function CardDetails({ card, onClose, isModal }: CardDetailsProps) {
   const [condition, setCondition] = useState<Condition>('nm');
+  const [finish, setFinish] = useState<'foil' | 'nonfoil'>(card.finish === 'foil' ? 'foil' : 'nonfoil');
   const [qty, setQty] = useState(1);
   const [selectedVendor, setSelectedVendor] = useState<string>(card.prices[0]?.vendor || '');
   const [customPrice, setCustomPrice] = useState<string>('');
   const { addToList, currency } = useAppStore();
   const [added, setAdded] = useState(false);
 
+  const getVendorPrice = (price: (typeof card.prices)[number]) => {
+    if (finish === 'foil') {
+      return price.foil ?? null;
+    }
+    return price[condition];
+  };
+
   const handleAdd = () => {
     const price = customPrice ? parseFloat(customPrice) : undefined;
-    addToList(card, qty, condition, selectedVendor, price, currency);
+    addToList(card, qty, condition, finish, selectedVendor, price, currency);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -120,10 +128,36 @@ export default function CardDetails({ card, onClose, isModal }: CardDetailsProps
               >{c.label}</button>
             ))}
           </div>
+
+          {card.finish === 'both' && (
+            <>
+              <h3 style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 10, fontWeight: 600 }}>Finish</h3>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+                {([
+                  { key: 'nonfoil', label: 'Non-Foil' },
+                  { key: 'foil', label: 'Foil' },
+                ] as const).map(option => (
+                  <button
+                    key={option.key}
+                    onClick={() => setFinish(option.key)}
+                    style={{
+                      flex: 1, padding: '8px 4px', borderRadius: 8, border: '2px solid',
+                      borderColor: finish === option.key ? 'var(--crimson)' : 'var(--border)',
+                      background: finish === option.key ? 'rgba(139,26,43,0.06)' : 'transparent',
+                      color: finish === option.key ? 'var(--crimson)' : 'var(--text-secondary)',
+                      fontWeight: 600, fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                      transition: 'all 0.15s',
+                    }}
+                  >{option.label}</button>
+                ))}
+              </div>
+            </>
+          )}
+
           <h3 style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 10, fontWeight: 600 }}>Vendors</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
             {card.prices.map(p => {
-              const price = p[condition];
+              const price = getVendorPrice(p);
               return (
                 <button
                   key={p.vendor}

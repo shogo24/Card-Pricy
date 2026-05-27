@@ -10,11 +10,25 @@ import { MTGCard } from '@/lib/types';
 import { useAppStore } from '@/lib/store';
 import { formatPrice } from '@/lib/currency';
 
+function parseBulkLine(line: string) {
+  const trimmed = line.trim();
+  const match = trimmed.match(/^(\d+)\s+(.*)$/);
+
+  if (!match) {
+    return { query: trimmed, count: 1 };
+  }
+
+  const count = Math.max(1, parseInt(match[1], 10) || 1);
+  const query = match[2].trim();
+  return { query, count };
+}
+
 function BulkResults() {
   const router = useRouter();
   const params = useSearchParams();
   const raw = params.get('q') || '';
-  const names = raw.split('\n').map(n => n.trim()).filter(Boolean);
+  const bulkEntries = raw.split('\n').map(parseBulkLine).filter(entry => entry.query);
+  const names = bulkEntries.flatMap(entry => Array.from({ length: entry.count }, () => entry.query));
   const hasQuery = raw.trim().length > 0;
 
   const [found, setFound] = useState<MTGCard[]>([]);
@@ -22,8 +36,14 @@ function BulkResults() {
   const [loadedRaw, setLoadedRaw] = useState('');
   const [selectedCardName, setSelectedCardName] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<MTGCard | null>(null);
-  const { currency } = useAppStore();
+  const { currency, list } = useAppStore();
   const loading = hasQuery && raw !== loadedRaw;
+
+  const listCounts = list.reduce((acc, entry) => {
+    const key = entry.card.name.toLowerCase();
+    acc[key] = (acc[key] || 0) + entry.quantity;
+    return acc;
+  }, {} as Record<string, number>);
 
   useEffect(() => {
     if (names.length === 0) return;
@@ -37,14 +57,11 @@ function BulkResults() {
         setFound(data.found || []);
         setMissing(data.missing || []);
       })
-      .catch(() => setMissing(names))
+        .catch(() => setMissing(names))
       .finally(() => setLoadedRaw(raw));
   }, [raw, names]);
 
-  // Group cards by name and get one representative per name
-  const uniqueCards = Array.from(
-    new Map(found.map(card => [card.name, card])).values()
-  );
+  const visibleCards = found;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
@@ -100,16 +117,18 @@ function BulkResults() {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
                 gap: 16,
               }}>
-                {uniqueCards.map((card) => {
+                {visibleCards.map((card, index) => {
                   const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
                   const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;
+                  const listCount = listCounts[card.name.toLowerCase()] || 0;
                   return (
                     <button
-                      key={card.id}
+                      key={`${card.id}-${index}`}
                       onClick={() => setSelectedCardName(card.name)}
                       style={{
                         background: 'var(--card-bg)',
                         border: '1px solid var(--border)',
+                        borderColor: listCount > 0 ? 'rgba(139,26,43,0.35)' : 'var(--border)',
                         borderRadius: 12,
                         overflow: 'hidden',
                         cursor: 'pointer',
@@ -128,10 +147,20 @@ function BulkResults() {
                           style={{ objectFit: 'cover' }}
                           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                         />
+                        {listCount > 0 && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(139,26,43,0.10) 0%, rgba(139,26,43,0.03) 35%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+                        )}
+                        {listCount > 0 && (
+                          <div style={{ position: 'absolute', top: 8, right: 8, padding: '4px 8px', borderRadius: 999, background: 'rgba(139,26,43,0.92)', color: '#fff', fontSize: 11, fontWeight: 700, boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }}>
+                            In list · x{listCount}
+                          </div>
+                        )}
                       </div>
                       <div style={{ padding: '10px 12px 12px' }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 4 }}>{card.name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{card.set}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
+                          {card.set} · {card.setCode} #{card.collectorNumber}{card.finish === 'foil' ? ' · Foil' : card.finish === 'both' ? ' · Foil / Nonfoil' : ''}
+                        </div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--crimson)' }}>
                           {lowestNm !== null ? formatPrice(lowestNm, currency) : 'N/A'}
                         </div>

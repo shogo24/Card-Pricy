@@ -16,6 +16,7 @@ export interface VendorPrice {
   nm: number | null;
   played: number | null;
   damaged: number | null;
+  foil?: number | null;
   inStock: boolean;
   url: string;
 }
@@ -44,6 +45,7 @@ export interface ListEntry {
   card: MTGCard;
   quantity: number;
   condition: Condition;
+  finish?: 'foil' | 'nonfoil';
   selectedVendor?: string;
   customPrice?: number;
   customPriceCurrency?: Currency;

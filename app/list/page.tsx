@@ -8,12 +8,13 @@ import { formatPrice, convertPrice, convertCurrencyPrice } from '@/lib/currency'
 
 export default function ListPage() {
   const router = useRouter();
-  const { list, removeFromList, updateQuantity, currency } = useAppStore();
+  const { list, removeFromList, updateQuantity, clearList, currency } = useAppStore();
   const [copied, setCopied] = useState(false);
 
   const getUnitPrice = (entry: (typeof list)[number]) => {
     const priceObj = entry.card.prices.find(v => v.vendor === entry.selectedVendor) || entry.card.prices[0];
-    const vendorPrice = priceObj?.[entry.condition] ?? 0;
+    const effectiveFinish = entry.finish ?? (entry.card.finish === 'foil' ? 'foil' : 'nonfoil');
+    const vendorPrice = effectiveFinish === 'foil' ? priceObj?.foil ?? null : priceObj?.[entry.condition] ?? 0;
 
     if (entry.customPrice !== undefined) {
       return convertCurrencyPrice(entry.customPrice, entry.customPriceCurrency ?? currency, currency) ?? 0;
@@ -54,6 +55,12 @@ export default function ListPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'card-pricy-list.csv'; a.click();
+  };
+
+  const handleClearList = () => {
+    if (window.confirm('Clear the entire list? This cannot be undone.')) {
+      clearList();
+    }
   };
 
   return (
@@ -99,14 +106,15 @@ export default function ListPage() {
                 {list.map((entry, i) => {
                   const unitPrice = getUnitPrice(entry);
                   const rowTotal = (unitPrice || 0) * entry.quantity;
+                  const rowKey = [entry.card.id, entry.condition, entry.finish ?? 'none', entry.selectedVendor ?? 'none', entry.customPrice ?? 'none', entry.customPriceCurrency ?? 'none'].join('|');
 
                   return (
-                    <div key={entry.card.id} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 160px 100px 80px 80px 40px', gap: 8, padding: '14px 20px', borderBottom: i < list.length - 1 ? '1px solid var(--cream-dark)' : 'none', alignItems: 'center' }}>
+                    <div key={rowKey} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 160px 100px 80px 80px 40px', gap: 8, padding: '14px 20px', borderBottom: i < list.length - 1 ? '1px solid var(--cream-dark)' : 'none', alignItems: 'center' }}>
                       {/* Qty */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         <input
                           type="number" min={1} value={entry.quantity}
-                          onChange={e => updateQuantity(entry.card.id, parseInt(e.target.value) || 1)}
+                          onChange={e => updateQuantity(entry, parseInt(e.target.value) || 1)}
                           style={{ width: 48, padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, fontFamily: 'DM Sans, sans-serif', textAlign: 'center', background: 'var(--cream)', outline: 'none' }}
                         />
                       </div>
@@ -123,7 +131,7 @@ export default function ListPage() {
                       <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{entry.card.set}</span>
 
                       {/* Condition */}
-                      <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>{entry.condition}</span>
+                      <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>{entry.condition}{entry.finish ? ` · ${entry.finish}` : ''}</span>
 
                       {/* Unit price */}
                       <span style={{ fontWeight: 600, fontSize: 14 }}>{formatLocalPrice(unitPrice || 0)}</span>
@@ -132,7 +140,7 @@ export default function ListPage() {
                       <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--crimson)' }}>{formatLocalPrice(rowTotal)}</span>
 
                       {/* Remove */}
-                      <button onClick={() => removeFromList(entry.card.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4, borderRadius: 6, transition: 'color 0.15s' }}
+                      <button onClick={() => removeFromList(entry)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4, borderRadius: 6, transition: 'color 0.15s' }}
                         onMouseEnter={e => (e.currentTarget.style.color = 'var(--crimson)')}
                         onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
                       >
@@ -143,14 +151,20 @@ export default function ListPage() {
                 })}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderTop: '2px solid var(--cream-dark)', gap: 16, flexWrap: 'wrap' }}>
-                  <button onClick={handleCopy} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--card-bg)', cursor: 'pointer' }}>
-                    <Copy size={15} />
-                    {copied ? 'Copied!' : 'Copy List'}
-                  </button>
-                  <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--card-bg)', cursor: 'pointer' }}>
-                    <Download size={15} />
-                    Export CSV
-                  </button>
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    <button onClick={handleCopy} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--card-bg)', cursor: 'pointer' }}>
+                      <Copy size={15} />
+                      {copied ? 'Copied!' : 'Copy List'}
+                    </button>
+                    <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--card-bg)', cursor: 'pointer' }}>
+                      <Download size={15} />
+                      Export CSV
+                    </button>
+                    <button onClick={handleClearList} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid #FCA5A5', background: '#FEF2F2', cursor: 'pointer', color: '#991B1B' }}>
+                      <Trash2 size={15} />
+                      Clear List
+                    </button>
+                  </div>
                   <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, fontWeight: 700 }}>
                     Total: <span style={{ color: 'var(--crimson)' }}>{formatPrice(total, currency)}</span>
                   </div>

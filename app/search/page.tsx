@@ -27,11 +27,11 @@ function SearchResults() {
       .then(data => {
         const results: MTGCard[] = data.cards || [];
         setCards(results);
-        // Add first result to recent searches
+        // Save the user's search term so Recently Searched matches what they typed.
         if (results.length > 0) {
           const first = results[0];
           const nm = first.prices.find(p => p.nm !== null)?.nm ?? 0;
-          addRecentSearch({ name: first.name, price: nm, change: +(Math.random() * 4 - 2).toFixed(1), timestamp: Date.now() });
+          addRecentSearch({ name: q, price: nm, change: +(Math.random() * 4 - 2).toFixed(1), timestamp: Date.now() });
         }
       })
       .catch(() => setError('Failed to fetch results. Please try again.'))

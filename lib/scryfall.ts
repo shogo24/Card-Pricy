@@ -9,6 +9,7 @@ interface ScryfallPriceMap {
   usd?: string | null;
   usd_foil?: string | null;
   eur?: string | null;
+  eur_foil?: string | null;
 }
 
 interface ScryfallLegalities {
@@ -53,6 +54,13 @@ interface ScryfallCollectionResponse {
   not_found?: Array<{ name?: string }>;
 }
 
+interface ParsedPrintingQuery {
+  name: string;
+  setCode?: string;
+  collectorNumber?: string;
+  foil?: boolean;
+}
+
 // Scryfall rate-limit: 50–100ms between requests. We add a small delay utility.
 let lastCall = 0;
 async function rateLimitedFetch(url: string): Promise<Response> {
@@ -74,6 +82,7 @@ function scryfallToCard(raw: ScryfallCard): MTGCard {
   const usdNm = raw.prices?.usd ? parseFloat(raw.prices.usd) : null;
   const usdFoil = raw.prices?.usd_foil ? parseFloat(raw.prices.usd_foil) : null;
   const eurNm = raw.prices?.eur ? parseFloat(raw.prices.eur) : null;
+  const eurFoil = raw.prices?.eur_foil ? parseFloat(raw.prices.eur_foil) : null;
 
   if (usdNm !== null || usdFoil !== null) {
     prices.push({
@@ -83,19 +92,21 @@ function scryfallToCard(raw: ScryfallCard): MTGCard {
       // Scryfall doesn't give played/damaged prices, so we estimate
       played: usdNm ? parseFloat((usdNm * 0.75).toFixed(2)) : null,
       damaged: usdNm ? parseFloat((usdNm * 0.40).toFixed(2)) : null,
+      foil: usdFoil,
       inStock: usdNm !== null,
       url: raw.purchase_uris?.tcgplayer || raw.scryfall_uri || '#',
     });
   }
 
-  if (eurNm !== null) {
+  if (eurNm !== null || eurFoil !== null) {
     prices.push({
       vendor: 'Cardmarket (EUR)',
       logoColor: '#2563eb',
       nm: eurNm,
       played: eurNm ? parseFloat((eurNm * 0.75).toFixed(2)) : null,
       damaged: eurNm ? parseFloat((eurNm * 0.40).toFixed(2)) : null,
-      inStock: eurNm !== null,
+      foil: eurFoil,
+      inStock: eurNm !== null || eurFoil !== null,
       url: raw.purchase_uris?.cardmarket || raw.scryfall_uri || '#',
     });
   }
@@ -143,6 +154,46 @@ function scryfallToCard(raw: ScryfallCard): MTGCard {
   };
 }
 
+function parseExactPrintingQuery(query: string): ParsedPrintingQuery | null {
+  const trimmed = query.trim();
+  if (!trimmed) return null;
+
+  const exactMatch = trimmed.match(/^(.*?)(?:\s*\(([^)]+)\))?(?:\s+(\d+))(?:\s+([FN]{1,2}))?$/i);
+  if (!exactMatch) return null;
+
+  const name = exactMatch[1].trim();
+  const setCode = exactMatch[2]?.trim().toLowerCase();
+  const collectorNumber = exactMatch[3]?.trim();
+  const finishToken = exactMatch[4]?.trim().toUpperCase();
+
+  if (!name || !setCode || !collectorNumber) return null;
+
+  return {
+    name,
+    setCode,
+    collectorNumber,
+    foil: finishToken ? finishToken.startsWith('F') : undefined,
+  };
+}
+
+async function resolveExactPrintingQuery(query: string): Promise<MTGCard | null> {
+  const parsed = parseExactPrintingQuery(query);
+  if (!parsed) return null;
+
+  const exactQuery = [
+    `!"${parsed.name}"`,
+    `set:${parsed.setCode}`,
+    `cn:${parsed.collectorNumber}`,
+    parsed.foil === true ? 'is:foil' : parsed.foil === false ? 'is:nonfoil' : '',
+  ].filter(Boolean).join(' ');
+
+  const exactRes = await rateLimitedFetch(`${BASE}/cards/search?q=${encodeURIComponent(exactQuery)}&order=released&unique=prints`);
+  if (!exactRes.ok) return null;
+
+  const exactData: ScryfallSearchResponse = await exactRes.json();
+  return (exactData.data || []).map(scryfallToCard)[0] || null;
+}
+
 // ------------------------------------------------------------------
 // Search cards by name (autocomplete)
 // ------------------------------------------------------------------
@@ -164,6 +215,11 @@ export async function scryfallAutocomplete(query: string): Promise<string[]> {
 export async function scryfallSearch(query: string): Promise<MTGCard[]> {
   if (!query.trim()) return [];
   try {
+    const exactCard = await resolveExactPrintingQuery(query);
+    if (exactCard) {
+      return [exactCard];
+    }
+
     const res = await rateLimitedFetch(`${BASE}/cards/search?q=${encodeURIComponent(query)}&order=released&unique=prints`);
     if (!res.ok) return [];
     const data: ScryfallSearchResponse = await res.json();
@@ -235,11 +291,25 @@ export async function scryfallGetByExactName(name: string): Promise<MTGCard | nu
 export async function scryfallBulkSearch(names: string[]): Promise<{ found: MTGCard[], missing: string[] }> {
   const found: MTGCard[] = [];
   const missing: string[] = [];
+  const plainNames: string[] = [];
+
+  for (const name of names) {
+    if (parseExactPrintingQuery(name)) {
+      const exactCard = await resolveExactPrintingQuery(name);
+      if (exactCard) {
+        found.push(exactCard);
+      } else {
+        missing.push(name);
+      }
+    } else {
+      plainNames.push(name);
+    }
+  }
 
   // Scryfall collection endpoint allows up to 75 cards at once
   const chunks: string[][] = [];
-  for (let i = 0; i < names.length; i += 75) {
-    chunks.push(names.slice(i, i + 75));
+  for (let i = 0; i < plainNames.length; i += 75) {
+    chunks.push(plainNames.slice(i, i + 75));
   }
 
   for (const chunk of chunks) {
@@ -256,15 +326,22 @@ export async function scryfallBulkSearch(names: string[]): Promise<{ found: MTGC
         continue;
       }
       const data: ScryfallCollectionResponse = await res.json();
-      const foundNames = new Set<string>();
+      const cardsByName = new Map<string, ScryfallCard[]>();
       for (const card of (data.data || [])) {
-        found.push(scryfallToCard(card));
-        foundNames.add(card.name.toLowerCase());
+        const key = card.name.toLowerCase();
+        const cardsForName = cardsByName.get(key) || [];
+        cardsForName.push(card);
+        cardsByName.set(key, cardsForName);
       }
-      for (const notFound of (data.not_found || [])) {
-        missing.push(notFound.name || 'Unknown');
+
+      for (const requestedName of chunk) {
+        const exactCard = cardsByName.get(requestedName.toLowerCase())?.[0];
+        if (exactCard) {
+          found.push(scryfallToCard(exactCard));
+        } else {
+          missing.push(requestedName);
+        }
       }
-      void foundNames;
     } catch {
       missing.push(...chunk);
     }
