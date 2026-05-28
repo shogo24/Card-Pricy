@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Trash2, Copy, Download } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAppStore } from '@/lib/store';
-import { formatPrice, convertPrice, convertCurrencyPrice } from '@/lib/currency';
+import { convertPrice, convertCurrencyPrice } from '@/lib/currency';
 
 export default function ListPage() {
   const router = useRouter();
@@ -77,7 +77,7 @@ export default function ListPage() {
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{list.reduce((s, e) => s + e.quantity, 0)} cards · {list.length} unique</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 700, color: 'var(--crimson)' }}>{formatPrice(total, currency)}</span>
+            <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 700, color: 'var(--crimson)' }}>{formatLocalPrice(total)}</span>
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total</span>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function ListPage() {
                     </button>
                   </div>
                   <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, fontWeight: 700 }}>
-                    Total: <span style={{ color: 'var(--crimson)' }}>{formatPrice(total, currency)}</span>
+                    Total: <span style={{ color: 'var(--crimson)' }}>{formatLocalPrice(total)}</span>
                   </div>
                 </div>
               </div>
