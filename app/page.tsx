@@ -5,6 +5,8 @@ import { Search, Clock, Database, Loader } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useAppStore } from '@/lib/store';
 
+const SURFACE = 'bg-card border border-line rounded-xl shadow-sm';
+
 export default function HomePage() {
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -56,21 +58,23 @@ export default function HomePage() {
     router.push(`/bulk?q=${encodeURIComponent(bulkText)}`);
   };
 
+  const bulkCount = bulkText.split('\n').filter(l => l.trim()).length;
+
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
+    <div className="min-h-screen bg-cream">
       <Navbar />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
-        <h1 className="font-display animate-fadeIn" style={{ fontSize: 40, fontWeight: 800, marginBottom: 32, color: 'var(--text-primary)' }}>
+      <main className="max-w-275 mx-auto px-6 py-12">
+        <h1 className="font-display animate-fadeIn text-[40px] font-extrabold mb-8 text-ink">
           Card Pricy – Search
         </h1>
 
         {/* Search bar */}
-        <div className="animate-fadeIn" style={{ position: 'relative', marginBottom: 32, zIndex: 30 }}>
-          <div style={{ display: 'flex', boxShadow: 'var(--shadow-md)', borderRadius: 12 }}>
-            <div style={{ flex: 1, position: 'relative', background: 'var(--card-bg)', borderRadius: '12px 0 0 12px', border: '1px solid var(--border)', borderRight: 'none', display: 'flex', alignItems: 'center' }}>
+        <div className="animate-fadeIn relative mb-8 z-30">
+          <div className="flex shadow-md rounded-xl">
+            <div className="flex-1 relative bg-card rounded-l-xl border border-r-0 border-line flex items-center">
               {loadingSuggestions
-                ? <Loader size={16} className="animate-spin" style={{ position: 'absolute', left: 16, color: 'var(--text-muted)' }} />
-                : <Search size={18} style={{ position: 'absolute', left: 16, color: 'var(--text-muted)' }} />
+                ? <Loader size={16} className="animate-spin absolute left-4 text-ink-muted" />
+                : <Search size={18} className="absolute left-4 text-ink-muted" />
               }
               <input
                 ref={inputRef}
@@ -81,27 +85,30 @@ export default function HomePage() {
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                style={{ width: '100%', padding: '18px 16px 18px 48px', background: 'transparent', border: 'none', outline: 'none', fontSize: 16, fontFamily: 'DM Sans, sans-serif', color: 'var(--text-primary)' }}
+                className="w-full pl-12 pr-4 py-4.5 bg-transparent border-none outline-none text-base font-sans text-ink"
               />
             </div>
-            <button onClick={handleSearch} className="btn-primary" style={{ padding: '0 36px', borderRadius: '0 12px 12px 0', border: 'none', cursor: 'pointer', fontSize: 16, whiteSpace: 'nowrap' }}>
+            <button
+              onClick={handleSearch}
+              className="bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98] px-9 rounded-r-xl border-none cursor-pointer text-base whitespace-nowrap"
+            >
               Search
             </button>
           </div>
 
           {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="animate-fadeIn" style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'var(--card-bg)', border: '1px solid var(--border)', borderTop: 'none', borderRadius: '0 0 12px 12px', zIndex: 20, boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+            <div className="animate-fadeIn absolute top-full inset-x-0 bg-card border border-t-0 border-line rounded-b-xl z-20 shadow-md overflow-hidden">
               {suggestions.map((name, i) => (
                 <button
                   key={name}
                   onMouseDown={() => handleSuggestionClick(name)}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 20px', background: 'none', border: 'none', borderBottom: i < suggestions.length - 1 ? '1px solid var(--cream-dark)' : 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', textAlign: 'left', transition: 'background 0.1s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--cream)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                  className={`w-full flex items-center gap-2.5 px-5 py-2.75 bg-transparent border-none cursor-pointer font-sans text-left transition-colors hover:bg-cream ${
+                    i < suggestions.length - 1 ? 'border-b border-cream-dark' : ''
+                  }`}
                 >
-                  <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 14, fontWeight: 500 }}>{name}</span>
+                  <Search size={13} className="text-ink-muted shrink-0" />
+                  <span className="text-sm font-medium">{name}</span>
                 </button>
               ))}
             </div>
@@ -109,55 +116,60 @@ export default function HomePage() {
         </div>
 
         {/* Bottom panels */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div className="grid grid-cols-2 gap-6">
           {/* Bulk Search */}
-          <div className="surface animate-fadeIn" style={{ padding: 24, animationDelay: '0.1s', opacity: 0 }}>
-            <h2 style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>Bulk Search</h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>One card name per line</p>
+          <div className={`${SURFACE} animate-fadeIn p-6 opacity-0 [animation-delay:0.1s]`}>
+            <h2 className="font-bold text-lg mb-1">Bulk Search</h2>
+            <p className="text-[13px] text-ink-muted mb-3.5">One card name per line</p>
             <textarea
               placeholder={"Lightning Bolt\nBlack Lotus\nCounterspell\nSol Ring"}
               value={bulkText}
               onChange={e => setBulkText(e.target.value)}
-              style={{ width: '100%', height: 220, padding: 16, border: '1px solid var(--border)', borderRadius: 10, background: 'var(--cream)', resize: 'none', outline: 'none', fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: 'var(--text-primary)', lineHeight: 1.8 }}
+              className="w-full h-55 p-4 border border-line rounded-[10px] bg-cream resize-none outline-none font-sans text-sm text-ink leading-[1.8]"
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {bulkText.split('\n').filter(l => l.trim()).length} card{bulkText.split('\n').filter(l => l.trim()).length !== 1 ? 's' : ''}
+            <div className="flex justify-between items-center mt-3">
+              <span className="text-xs text-ink-muted">
+                {bulkCount} card{bulkCount !== 1 ? 's' : ''}
               </span>
-              <button onClick={handleBulkSearch} className="btn-primary" style={{ padding: '10px 28px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}>
+              <button
+                onClick={handleBulkSearch}
+                className="bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98] px-7 py-2.5 rounded-lg border-none cursor-pointer text-sm"
+              >
                 Search
               </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div className="flex flex-col gap-6">
             {/* Recently Searched */}
-            <div className="surface animate-fadeIn" style={{ padding: 24, animationDelay: '0.15s', opacity: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <Clock size={16} style={{ color: 'var(--text-muted)' }} />
-                <h2 style={{ fontWeight: 700, fontSize: 18 }}>Recently Searched</h2>
+            <div className={`${SURFACE} animate-fadeIn p-6 opacity-0 [animation-delay:0.15s]`}>
+              <div className="flex items-center gap-2 mb-4">
+                <Clock size={16} className="text-ink-muted" />
+                <h2 className="font-bold text-lg">Recently Searched</h2>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="flex flex-col">
                 {recentSearches.slice(0, 6).map((item, i) => (
                   <button
                     key={`${item.name}-${i}`}
                     onClick={() => router.push(`/search?q=${encodeURIComponent(item.name)}`)}
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', background: 'none', border: 'none', borderBottom: i < Math.min(recentSearches.length, 6) - 1 ? '1px solid var(--cream-dark)' : 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', textAlign: 'left' }}
+                    className={`flex justify-between items-center py-2.5 bg-transparent border-none cursor-pointer font-sans text-left ${
+                      i < Math.min(recentSearches.length, 6) - 1 ? 'border-b border-cream-dark' : ''
+                    }`}
                   >
-                    <span style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-primary)' }}>{item.name}</span>
+                    <span className="font-medium text-sm text-ink">{item.name}</span>
                   </button>
                 ))}
               </div>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 12 }}>Data provided by Scryfall</p>
+              <p className="text-xs text-ink-muted mt-3">Data provided by Scryfall</p>
             </div>
 
             {/* Data Sources */}
-            <div className="surface animate-fadeIn" style={{ padding: 20, animationDelay: '0.2s', opacity: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <Database size={15} style={{ color: 'var(--text-muted)' }} />
-                <h3 style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-secondary)' }}>Live Data Sources</h3>
+            <div className={`${SURFACE} animate-fadeIn p-5 opacity-0 [animation-delay:0.2s]`}>
+              <div className="flex items-center gap-2 mb-3">
+                <Database size={15} className="text-ink-muted" />
+                <h3 className="font-semibold text-sm text-ink-secondary">Live Data Sources</h3>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              <div className="flex flex-wrap gap-2">
                 {[
                   { name: 'Scryfall', status: 'live', href: 'https://scryfall.com/' },
                   { name: 'TCGPlayer', status: 'via Scryfall', href: 'https://www.tcgplayer.com/' },
@@ -168,10 +180,10 @@ export default function HomePage() {
                     href={src.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    style={{ padding: '4px 12px', borderRadius: 99, background: 'var(--cream)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-secondary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                    className="px-3 py-1 rounded-full bg-cream border border-line text-xs text-ink-secondary no-underline inline-flex items-center"
                   >
-                    <span style={{ fontWeight: 700 }}>{src.name}</span>
-                    <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>· {src.status}</span>
+                    <span className="font-bold">{src.name}</span>
+                    <span className="text-ink-muted ml-1">· {src.status}</span>
                   </a>
                 ))}
               </div>

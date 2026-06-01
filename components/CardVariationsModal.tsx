@@ -28,31 +28,30 @@ export default function CardVariationsModal({ cardName, onClose, onSelectVariati
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+      className="fixed inset-0 bg-black/60 z-100 flex items-center justify-center p-6"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="animate-scaleIn" style={{ background: 'var(--card-bg)', borderRadius: 20, padding: 32, maxWidth: 1000, width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'var(--cream)', border: '1px solid var(--border)', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="animate-scaleIn bg-card rounded-[20px] p-8 max-w-250 w-full max-h-[90vh] overflow-y-auto relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 bg-cream border border-line rounded-lg w-8 h-8 cursor-pointer flex items-center justify-center"
+        >
           <X size={16} />
         </button>
 
-        <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 800, marginBottom: 24 }}>{cardName}</h2>
+        <h2 className="font-display text-2xl font-extrabold mb-6">{cardName}</h2>
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 0', gap: 16, color: 'var(--text-muted)' }}>
-            <Loader size={32} className="animate-spin" style={{ color: 'var(--crimson)' }} />
+          <div className="flex flex-col items-center py-15 gap-4 text-ink-muted">
+            <Loader size={32} className="animate-spin text-crimson" />
             <p>Loading card variations...</p>
           </div>
         ) : variations.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+          <div className="text-center py-10 text-ink-muted">
             <p>No variations found</p>
           </div>
         ) : (
-          <div className="stagger-children" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-            gap: 12,
-          }}>
+          <div className="stagger-children grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
             {variations.map((card) => {
               const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
               const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;
@@ -60,40 +59,21 @@ export default function CardVariationsModal({ cardName, onClose, onSelectVariati
                 <button
                   key={card.id}
                   onClick={() => onSelectVariation(card)}
-                  style={{
-                    background: 'var(--card-bg)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 12,
-                    overflow: 'hidden',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    padding: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.15s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--crimson)';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  }}
+                  className="bg-card border border-line rounded-xl overflow-hidden cursor-pointer text-left p-0 flex flex-col transition-all duration-150 hover:border-crimson hover:-translate-y-0.5"
                 >
-                  <div style={{ position: 'relative', paddingTop: '139%', background: 'var(--cream-dark)', width: '100%' }}>
+                  <div className="relative pt-[139%] bg-cream-dark w-full">
                     <Image
                       src={card.imageUrl}
                       alt={card.name}
                       fill
                       sizes="140px"
-                      style={{ objectFit: 'cover' }}
+                      className="object-cover"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
                   </div>
-                  <div style={{ padding: '8px 10px 10px' }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{card.set}</div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--crimson)' }}>
+                  <div className="px-2.5 pt-2 pb-2.5">
+                    <div className="text-[11px] text-ink-muted mb-1">{card.set}</div>
+                    <div className="text-[11px] font-bold text-crimson">
                       {lowestNm !== null ? formatPrice(lowestNm, currency) : 'N/A'}
                     </div>
                   </div>

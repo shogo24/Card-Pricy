@@ -12,42 +12,36 @@ export default function Navbar() {
   const currencies: Currency[] = ['CAD', 'USD', 'EUR'];
 
   return (
-    <nav style={{ background: 'var(--card-bg)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 50 }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+    <nav className="bg-card border-b border-line sticky top-0 z-50">
+      <div className="max-w-300 mx-auto px-6 h-15 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 no-underline">
           <Image src="/CardPricyLogo.png" alt="Card Pricy Logo" width={28} height={28} priority />
-          <span style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 20, color: 'var(--crimson)' }}>Card Pricy</span>
+          <span className="font-display font-bold text-xl text-crimson">Card Pricy</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'var(--text-secondary)' }}>
+        <div className="flex items-center gap-5">
+          <div className="flex items-center gap-1.5 text-sm text-ink-secondary">
             {currencies.map((c, i) => (
-              <span key={c} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                {i > 0 && <span style={{ color: 'var(--border)' }}>|</span>}
+              <span key={c} className="flex items-center gap-1.5">
+                {i > 0 && <span className="text-line">|</span>}
                 <button
                   onClick={() => setCurrency(c)}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
-                    borderRadius: 4, fontWeight: currency === c ? 700 : 400,
-                    color: currency === c ? 'var(--text-primary)' : 'var(--text-muted)',
-                    fontSize: 14, fontFamily: 'DM Sans, sans-serif',
-                  }}
+                  className={`bg-transparent border-none cursor-pointer px-1 py-0.5 rounded text-sm font-sans ${
+                    currency === c ? 'font-bold text-ink' : 'font-normal text-ink-muted'
+                  }`}
                 >{c}</button>
               </span>
             ))}
           </div>
           <button
             onClick={() => router.push('/list')}
-            className="btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14, position: 'relative' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border-none cursor-pointer text-sm relative bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98]"
           >
             <List size={16} />
             List
             {list.length > 0 && (
-              <span style={{
-                position: 'absolute', top: -6, right: -6, background: 'var(--cream)', color: 'var(--crimson)',
-                borderRadius: '50%', width: 18, height: 18, fontSize: 11, fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--crimson)'
-              }}>{list.reduce((s, e) => s + e.quantity, 0)}</span>
+              <span className="absolute -top-1.5 -right-1.5 bg-cream text-crimson rounded-full w-4.5 h-4.5 text-[11px] font-bold flex items-center justify-center border border-crimson">
+                {list.reduce((s, e) => s + e.quantity, 0)}
+              </span>
             )}
           </button>
         </div>

@@ -25,11 +25,7 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
   }, {} as Record<string, number>);
 
   return (
-    <div className="stagger-children" style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-      gap: 16,
-    }}>
+    <div className="stagger-children grid gap-4 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
       {cards.map((card) => {
         const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
         const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;
@@ -38,48 +34,39 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
           <button
             key={card.id}
             onClick={() => onCardClick(card)}
-            className="card-hover"
-            style={{
-              background: 'var(--card-bg)',
-              border: '1px solid var(--border)',
-              borderColor: listCount > 0 ? 'rgba(139,26,43,0.35)' : 'var(--border)',
-              borderRadius: 12,
-              overflow: 'hidden',
-              cursor: 'pointer',
-              textAlign: 'left',
-              padding: 0,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
+            className={`bg-card rounded-xl overflow-hidden cursor-pointer text-left p-0 flex flex-col border transition-[transform,box-shadow] duration-200 hover:-translate-y-0.75 hover:shadow-lg ${
+              listCount > 0 ? 'border-crimson-ring' : 'border-line'
+            }`}
           >
-            <div style={{ position: 'relative', paddingTop: '139%', background: 'var(--cream-dark)', width: '100%' }}>
+            <div className="relative pt-[139%] bg-cream-dark w-full">
               <Image
                 src={card.imageUrl}
                 alt={card.name}
                 fill
                 sizes="(max-width: 768px) 50vw, 160px"
-                style={{ objectFit: 'cover' }}
+                className="object-cover"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
               />
               {listCount > 0 && (
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(139,26,43,0.10) 0%, rgba(139,26,43,0.03) 35%, rgba(0,0,0,0) 100%)', pointerEvents: 'none' }} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, rgba(139,26,43,0.10) 0%, rgba(139,26,43,0.03) 35%, rgba(0,0,0,0) 100%)' }}
+                />
               )}
               {listCount > 0 && (
-                <div style={{ position: 'absolute', top: 8, right: 8, padding: '4px 8px', borderRadius: 999, background: 'rgba(139,26,43,0.92)', color: '#fff', fontSize: 11, fontWeight: 700, boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }}>
+                <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-crimson-soft-strong text-white text-[11px] font-bold shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
                   In list · x{listCount}
                 </div>
               )}
-              <div style={{
-                position: 'absolute', top: 8, left: 8,
-                background: RARITY_COLOR[card.rarity],
-                width: 8, height: 8, borderRadius: '50%',
-                boxShadow: '0 0 4px currentColor',
-              }} />
+              <div
+                className="absolute top-2 left-2 w-2 h-2 rounded-full shadow-[0_0_4px_currentColor]"
+                style={{ background: RARITY_COLOR[card.rarity] }}
+              />
             </div>
-            <div style={{ padding: '10px 12px 12px' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.3, marginBottom: 4 }}>{card.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{card.set}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--crimson)' }}>
+            <div className="px-3 pt-2.5 pb-3">
+              <div className="text-[13px] font-semibold text-ink leading-tight mb-1">{card.name}</div>
+              <div className="text-[11px] text-ink-muted mb-1.5">{card.set}</div>
+              <div className="text-[13px] font-bold text-crimson">
                 {lowestNm !== null ? formatPrice(lowestNm, currency) : 'N/A'}
               </div>
             </div>
