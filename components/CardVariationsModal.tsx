@@ -28,18 +28,18 @@ export default function CardVariationsModal({ cardName, onClose, onSelectVariati
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 z-100 flex items-center justify-center p-6"
+      className="fixed inset-0 bg-black/60 z-100 flex items-center justify-center p-3 sm:p-6"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="animate-scaleIn bg-card rounded-[20px] p-8 max-w-250 w-full max-h-[90vh] overflow-y-auto relative">
+      <div className="animate-scaleIn bg-card rounded-2xl sm:rounded-[20px] p-4 sm:p-6 md:p-8 pt-12 sm:pt-6 md:pt-8 max-w-250 w-full max-h-[92vh] overflow-y-auto relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 bg-cream border border-line rounded-lg w-8 h-8 cursor-pointer flex items-center justify-center"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-cream border border-line rounded-lg w-9 h-9 sm:w-8 sm:h-8 cursor-pointer flex items-center justify-center"
         >
           <X size={16} />
         </button>
 
-        <h2 className="font-display text-2xl font-extrabold mb-6">{cardName}</h2>
+        <h2 className="font-display text-xl sm:text-2xl font-extrabold mb-4 sm:mb-6 pr-10">{cardName}</h2>
 
         {loading ? (
           <div className="flex flex-col items-center py-15 gap-4 text-ink-muted">
@@ -51,7 +51,7 @@ export default function CardVariationsModal({ cardName, onClose, onSelectVariati
             <p>No variations found</p>
           </div>
         ) : (
-          <div className="stagger-children grid gap-3 grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
+          <div className="stagger-children grid gap-3 grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))]">
             {variations.map((card) => {
               const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
               const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;

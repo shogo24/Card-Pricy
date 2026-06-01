@@ -66,15 +66,15 @@ function BulkResults() {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      <main className="max-w-300 mx-auto px-6 py-8">
+      <main className="max-w-300 mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm mb-6 p-0"
+          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm mb-4 sm:mb-6 p-0"
         >
           <ArrowLeft size={16} /> Back
         </button>
 
-        <h1 className="font-display text-[28px] font-extrabold mb-2">Bulk Search Results</h1>
+        <h1 className="font-display text-2xl sm:text-[28px] font-extrabold mb-2">Bulk Search Results</h1>
 
         {!hasQuery ? (
           <div className="text-center py-15 text-ink-muted">
@@ -118,7 +118,7 @@ function BulkResults() {
                 <p className="text-lg">No cards found. Check your card names and try again.</p>
               </div>
             ) : (
-              <div className="stagger-children grid gap-4 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
+              <div className="stagger-children grid gap-3 sm:gap-4 grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
                 {visibleCards.map((card, index) => {
                   const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
                   const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;

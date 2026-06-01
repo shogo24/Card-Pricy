@@ -13,19 +13,19 @@ export default function Navbar() {
 
   return (
     <nav className="bg-card border-b border-line sticky top-0 z-50">
-      <div className="max-w-300 mx-auto px-6 h-15 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 no-underline">
+      <div className="max-w-300 mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-3">
+        <Link href="/" className="flex items-center gap-2.5 no-underline min-w-0">
           <Image src="/CardPricyLogo.png" alt="Card Pricy Logo" width={28} height={28} priority />
-          <span className="font-display font-bold text-xl text-crimson">Card Pricy</span>
+          <span className="font-display font-bold text-lg sm:text-xl text-crimson truncate">Card Pricy</span>
         </Link>
-        <div className="flex items-center gap-5">
-          <div className="flex items-center gap-1.5 text-sm text-ink-secondary">
+        <div className="flex items-center gap-2 sm:gap-5">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-ink-secondary">
             {currencies.map((c, i) => (
-              <span key={c} className="flex items-center gap-1.5">
+              <span key={c} className="flex items-center gap-1 sm:gap-1.5">
                 {i > 0 && <span className="text-line">|</span>}
                 <button
                   onClick={() => setCurrency(c)}
-                  className={`bg-transparent border-none cursor-pointer px-1 py-0.5 rounded text-sm font-sans ${
+                  className={`bg-transparent border-none cursor-pointer px-1 py-0.5 rounded text-xs sm:text-sm font-sans ${
                     currency === c ? 'font-bold text-ink' : 'font-normal text-ink-muted'
                   }`}
                 >{c}</button>
@@ -34,7 +34,7 @@ export default function Navbar() {
           </div>
           <button
             onClick={() => router.push('/list')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border-none cursor-pointer text-sm relative bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98]"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border-none cursor-pointer text-sm relative bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98]"
           >
             <List size={16} />
             List

@@ -63,8 +63,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      <main className="max-w-275 mx-auto px-6 py-12">
-        <h1 className="font-display animate-fadeIn text-[40px] font-extrabold mb-8 text-ink">
+      <main className="max-w-275 mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <h1 className="font-display animate-fadeIn text-3xl sm:text-[40px] font-extrabold mb-6 sm:mb-8 text-ink">
           Card Pricy – Search
         </h1>
 
@@ -90,7 +90,7 @@ export default function HomePage() {
             </div>
             <button
               onClick={handleSearch}
-              className="bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98] px-9 rounded-r-xl border-none cursor-pointer text-base whitespace-nowrap"
+              className="bg-crimson text-white font-semibold transition-colors hover:bg-crimson-dark active:scale-[0.98] px-5 sm:px-9 rounded-r-xl border-none cursor-pointer text-base whitespace-nowrap"
             >
               Search
             </button>
@@ -116,7 +116,7 @@ export default function HomePage() {
         </div>
 
         {/* Bottom panels */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Bulk Search */}
           <div className={`${SURFACE} animate-fadeIn p-6 opacity-0 [animation-delay:0.1s]`}>
             <h2 className="font-bold text-lg mb-1">Bulk Search</h2>

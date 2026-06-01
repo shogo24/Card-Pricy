@@ -61,22 +61,22 @@ export default function CardDetails({ card, onClose, isModal }: CardDetailsProps
   };
 
   const container = (
-    <div className="grid grid-cols-[280px_1fr] gap-8 h-full">
-      <div>
+    <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 md:gap-8 h-full">
+      <div className="max-w-70 mx-auto w-full md:max-w-none md:mx-0">
         <Image
           src={card.imageUrl}
           alt={card.name}
           width={280}
           height={392}
-          sizes="280px"
+          sizes="(max-width: 768px) 280px, 280px"
           className="w-full h-auto rounded-2xl shadow-lg"
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
         />
       </div>
 
-      <div className="grid grid-cols-[1fr_280px] gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
         <div>
-          <h1 className="font-display text-[28px] font-extrabold mb-1">{card.name}</h1>
+          <h1 className="font-display text-2xl sm:text-[28px] font-extrabold mb-1">{card.name}</h1>
           {card.alternateArt && <p className="text-ink-muted text-[13px] mb-3">{card.alternateArt}</p>}
           <div className="grid grid-cols-2 gap-y-2 gap-x-6 mb-5 text-[13px]">
             {[
@@ -248,13 +248,13 @@ export default function CardDetails({ card, onClose, isModal }: CardDetailsProps
   if (isModal) {
     return (
       <div
-        className="fixed inset-0 bg-black/60 z-100 flex items-center justify-center p-6"
+        className="fixed inset-0 bg-black/60 z-100 flex items-center justify-center p-3 sm:p-6"
         onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
       >
-        <div className="animate-scaleIn bg-card rounded-[20px] p-8 max-w-225 w-full max-h-[90vh] overflow-y-auto relative">
+        <div className="animate-scaleIn bg-card rounded-2xl sm:rounded-[20px] p-4 sm:p-6 md:p-8 pt-12 sm:pt-6 md:pt-8 max-w-225 w-full max-h-[92vh] overflow-y-auto relative">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 bg-cream border border-line rounded-lg w-8 h-8 cursor-pointer flex items-center justify-center"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-cream border border-line rounded-lg w-9 h-9 sm:w-8 sm:h-8 cursor-pointer flex items-center justify-center"
           >
             <X size={16} />
           </button>
@@ -265,7 +265,7 @@ export default function CardDetails({ card, onClose, isModal }: CardDetailsProps
   }
 
   return (
-    <div className="max-w-300 mx-auto px-6 py-8 animate-fadeIn">
+    <div className="max-w-300 mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fadeIn">
       {container}
     </div>
   );

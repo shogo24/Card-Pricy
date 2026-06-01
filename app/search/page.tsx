@@ -41,16 +41,16 @@ function SearchResults() {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      <main className="max-w-300 mx-auto px-6 py-8">
+      <main className="max-w-300 mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm mb-6 p-0"
+          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm mb-4 sm:mb-6 p-0"
         >
           <ArrowLeft size={16} /> Back
         </button>
 
-        <div className="mb-6">
-          <h1 className="font-display text-[28px] font-extrabold mb-1">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="font-display text-2xl sm:text-[28px] font-extrabold mb-1 wrap-break-word">
             {q ? `Results for "${q}"` : 'Search Results'}
           </h1>
           {!loading && (

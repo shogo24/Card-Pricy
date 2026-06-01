@@ -25,7 +25,7 @@ export default function CardGrid({ cards, onCardClick }: CardGridProps) {
   }, {} as Record<string, number>);
 
   return (
-    <div className="stagger-children grid gap-4 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
+    <div className="stagger-children grid gap-3 sm:gap-4 grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))]">
       {cards.map((card) => {
         const availablePrices = card.prices.filter(p => p.nm !== null).map(p => p.nm!);
         const lowestNm = availablePrices.length > 0 ? Math.min(...availablePrices) : null;
