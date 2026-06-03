@@ -6,6 +6,8 @@ import Navbar from '@/components/Navbar';
 import { useAppStore } from '@/lib/store';
 import { convertPrice, convertCurrencyPrice } from '@/lib/currency';
 
+const ROW_GRID = 'grid grid-cols-[60px_1fr_160px_100px_80px_80px_40px] gap-2';
+
 export default function ListPage() {
   const router = useRouter();
   const { list, removeFromList, updateQuantity, clearList, currency } = useAppStore();
@@ -64,34 +66,37 @@ export default function ListPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
+    <div className="min-h-screen bg-cream">
       <Navbar />
-      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 24px' }}>
-        <button onClick={() => router.back()} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24, padding: 0 }}>
+      <main className="max-w-250 mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm mb-4 sm:mb-6 p-0"
+        >
           <ArrowLeft size={16} /> Back
         </button>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
-            <h1 className="font-display" style={{ fontSize: 32, fontWeight: 800, marginBottom: 4 }}>Card Pricy – List</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{list.reduce((s, e) => s + e.quantity, 0)} cards · {list.length} unique</p>
+            <h1 className="font-display text-2xl sm:text-[32px] font-extrabold mb-1">Card Pricy – List</h1>
+            <p className="text-ink-muted text-sm">{list.reduce((s, e) => s + e.quantity, 0)} cards · {list.length} unique</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 700, color: 'var(--crimson)' }}>{formatLocalPrice(total)}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total</span>
+          <div className="flex items-baseline gap-2 sm:items-center sm:gap-3">
+            <span className="font-display text-2xl font-bold text-crimson">{formatLocalPrice(total)}</span>
+            <span className="text-xs text-ink-muted">Total</span>
           </div>
         </div>
 
-        <div className="surface animate-fadeIn" style={{ overflow: 'hidden' }}>
+        <div className="bg-card border border-line rounded-xl shadow-sm animate-fadeIn overflow-hidden">
           {list.length === 0 ? (
-            <div style={{ padding: '60px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: 18, marginBottom: 8 }}>Your list is empty</p>
-              <p style={{ fontSize: 14 }}>Search for cards and add them to your list</p>
+            <div className="px-6 py-12 sm:py-15 text-center text-ink-muted">
+              <p className="text-lg mb-2">Your list is empty</p>
+              <p className="text-sm">Search for cards and add them to your list</p>
             </div>
           ) : (
             <>
-              {/* Header */}
-              <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr 160px 100px 80px 80px 40px', gap: 8, padding: '12px 20px', borderBottom: '2px solid var(--cream-dark)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)', fontWeight: 700 }}>
+              {/* Column headers — desktop only */}
+              <div className={`hidden md:grid ${ROW_GRID} px-5 py-3 border-b-2 border-cream-dark text-[11px] uppercase tracking-[0.06em] text-ink-muted font-bold`}>
                 <span>Qty</span>
                 <span>Card Name</span>
                 <span>Set</span>
@@ -107,66 +112,112 @@ export default function ListPage() {
                   const unitPrice = getUnitPrice(entry);
                   const rowTotal = (unitPrice || 0) * entry.quantity;
                   const rowKey = [entry.card.id, entry.condition, entry.finish ?? 'none', entry.selectedVendor ?? 'none', entry.customPrice ?? 'none', entry.customPriceCurrency ?? 'none'].join('|');
+                  const isLast = i === list.length - 1;
 
                   return (
-                    <div key={rowKey} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 160px 100px 80px 80px 40px', gap: 8, padding: '14px 20px', borderBottom: i < list.length - 1 ? '1px solid var(--cream-dark)' : 'none', alignItems: 'center' }}>
-                      {/* Qty */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <input
-                          type="number" min={1} value={entry.quantity}
-                          onChange={e => updateQuantity(entry, parseInt(e.target.value) || 1)}
-                          style={{ width: 48, padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, fontFamily: 'DM Sans, sans-serif', textAlign: 'center', background: 'var(--cream)', outline: 'none' }}
-                        />
+                    <div key={rowKey}>
+                      {/* Mobile card layout */}
+                      <div className={`md:hidden p-4 ${!isLast ? 'border-b border-cream-dark' : ''}`}>
+                        <div className="flex justify-between items-start gap-3 mb-2">
+                          <button
+                            onClick={() => router.push(`/cards/${entry.card.id}`)}
+                            className="text-left bg-transparent border-none cursor-pointer font-sans font-semibold text-[15px] text-ink flex-1 leading-snug"
+                          >
+                            {entry.card.name}
+                          </button>
+                          <button
+                            onClick={() => removeFromList(entry)}
+                            className="bg-transparent border-none cursor-pointer text-ink-muted hover:text-crimson p-2 -m-2 transition-colors shrink-0"
+                            aria-label="Remove from list"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <div className="text-[11px] text-ink-muted uppercase tracking-wider mb-3">
+                          {entry.card.set} · {entry.condition}{entry.finish ? ` · ${entry.finish}` : ''}
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] text-ink-muted uppercase tracking-wider font-semibold">Qty</span>
+                            <input
+                              type="number" min={1} value={entry.quantity}
+                              onChange={e => updateQuantity(entry, parseInt(e.target.value) || 1)}
+                              className="w-14 px-2 py-1.5 border border-line rounded-md text-sm font-sans text-center bg-cream outline-none"
+                            />
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[11px] text-ink-muted">Unit {formatLocalPrice(unitPrice || 0)}</div>
+                            <div className="font-bold text-base text-crimson">{formatLocalPrice(rowTotal)}</div>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Name */}
-                      <button
-                        onClick={() => router.push(`/cards/${entry.card.id}`)}
-                        style={{ textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}
+                      {/* Desktop grid row */}
+                      <div
+                        className={`hidden md:grid ${ROW_GRID} px-5 py-3.5 items-center ${
+                          !isLast ? 'border-b border-cream-dark' : ''
+                        }`}
                       >
-                        {entry.card.name}
-                      </button>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number" min={1} value={entry.quantity}
+                            onChange={e => updateQuantity(entry, parseInt(e.target.value) || 1)}
+                            className="w-12 px-1.5 py-1 border border-line rounded-md text-[13px] font-sans text-center bg-cream outline-none"
+                          />
+                        </div>
 
-                      {/* Set */}
-                      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{entry.card.set}</span>
+                        <button
+                          onClick={() => router.push(`/cards/${entry.card.id}`)}
+                          className="text-left bg-transparent border-none cursor-pointer font-sans"
+                        >
+                          {entry.card.name}
+                        </button>
 
-                      {/* Condition */}
-                      <span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600 }}>{entry.condition}{entry.finish ? ` · ${entry.finish}` : ''}</span>
+                        <span className="text-[13px] text-ink-secondary">{entry.card.set}</span>
 
-                      {/* Unit price */}
-                      <span style={{ fontWeight: 600, fontSize: 14 }}>{formatLocalPrice(unitPrice || 0)}</span>
+                        <span className="text-xs uppercase text-ink-muted font-semibold">{entry.condition}{entry.finish ? ` · ${entry.finish}` : ''}</span>
 
-                      {/* Total */}
-                      <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--crimson)' }}>{formatLocalPrice(rowTotal)}</span>
+                        <span className="font-semibold text-sm">{formatLocalPrice(unitPrice || 0)}</span>
 
-                      {/* Remove */}
-                      <button onClick={() => removeFromList(entry)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4, borderRadius: 6, transition: 'color 0.15s' }}
-                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--crimson)')}
-                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                        <span className="font-bold text-sm text-crimson">{formatLocalPrice(rowTotal)}</span>
+
+                        <button
+                          onClick={() => removeFromList(entry)}
+                          className="bg-transparent border-none cursor-pointer text-ink-muted flex items-center justify-center p-1 rounded-md transition-colors hover:text-crimson"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderTop: '2px solid var(--cream-dark)', gap: 16, flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    <button onClick={handleCopy} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--card-bg)', cursor: 'pointer' }}>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center px-4 sm:px-5 py-4 border-t-2 border-cream-dark gap-3 sm:gap-4">
+                  <div className="flex gap-2 sm:gap-3 flex-wrap">
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-[10px] border border-line bg-card cursor-pointer text-sm"
+                    >
                       <Copy size={15} />
                       {copied ? 'Copied!' : 'Copy List'}
                     </button>
-                    <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--card-bg)', cursor: 'pointer' }}>
+                    <button
+                      onClick={handleExport}
+                      className="flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-[10px] border border-line bg-card cursor-pointer text-sm"
+                    >
                       <Download size={15} />
                       Export CSV
                     </button>
-                    <button onClick={handleClearList} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: '1px solid #FCA5A5', background: '#FEF2F2', cursor: 'pointer', color: '#991B1B' }}>
+                    <button
+                      onClick={handleClearList}
+                      className="flex items-center gap-2 px-3 sm:px-3.5 py-2.5 rounded-[10px] border border-[#FCA5A5] bg-[#FEF2F2] cursor-pointer text-[#991B1B] text-sm"
+                    >
                       <Trash2 size={15} />
                       Clear List
                     </button>
                   </div>
-                  <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 20, fontWeight: 700 }}>
-                    Total: <span style={{ color: 'var(--crimson)' }}>{formatLocalPrice(total)}</span>
+                  <div className="font-display text-lg sm:text-xl font-bold">
+                    Total: <span className="text-crimson">{formatLocalPrice(total)}</span>
                   </div>
                 </div>
               </div>

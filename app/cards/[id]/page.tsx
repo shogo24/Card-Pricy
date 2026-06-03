@@ -29,25 +29,28 @@ export default function CardPage() {
   }, [id]);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
+    <div className="min-h-screen bg-cream">
       <Navbar />
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 0' }}>
-        <button onClick={() => router.back()} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', color: 'var(--text-secondary)', fontSize: 14, padding: 0 }}>
+      <div className="max-w-300 mx-auto pt-4 sm:pt-6 px-4 sm:px-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm p-0"
+        >
           <ArrowLeft size={16} /> Back
         </button>
       </div>
 
       {loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '100px 0', gap: 16, color: 'var(--text-muted)' }}>
-          <Loader size={32} className="animate-spin" style={{ color: 'var(--crimson)' }} />
+        <div className="flex flex-col items-center py-16 sm:py-25 gap-4 text-ink-muted">
+          <Loader size={32} className="animate-spin text-crimson" />
           <p>Loading card data...</p>
         </div>
       )}
 
       {error && (
-        <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center', padding: '0 24px' }}>
-          <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, marginBottom: 12 }}>Card Not Found</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 15 }}>{error}</p>
+        <div className="max-w-150 mx-auto mt-10 sm:mt-15 text-center px-4 sm:px-6">
+          <h1 className="font-display text-2xl sm:text-[28px] mb-3">Card Not Found</h1>
+          <p className="text-ink-muted text-[15px]">{error}</p>
         </div>
       )}
 

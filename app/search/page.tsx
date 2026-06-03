@@ -39,41 +39,44 @@ function SearchResults() {
   }, [q, addRecentSearch]);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--cream)' }}>
+    <div className="min-h-screen bg-cream">
       <Navbar />
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
-        <button onClick={() => router.back()} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24, padding: 0 }}>
+      <main className="max-w-300 mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 bg-transparent border-none cursor-pointer font-sans text-ink-secondary text-sm mb-4 sm:mb-6 p-0"
+        >
           <ArrowLeft size={16} /> Back
         </button>
 
-        <div style={{ marginBottom: 24 }}>
-          <h1 className="font-display" style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>
+        <div className="mb-4 sm:mb-6">
+          <h1 className="font-display text-2xl sm:text-[28px] font-extrabold mb-1 wrap-break-word">
             {q ? `Results for "${q}"` : 'Search Results'}
           </h1>
           {!loading && (
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+            <p className="text-ink-muted text-sm">
               {error ? '' : `${cards.length} printing${cards.length !== 1 ? 's' : ''} found`}
             </p>
           )}
         </div>
 
         {loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', gap: 16, color: 'var(--text-muted)' }}>
-            <Loader size={32} className="animate-spin" style={{ color: 'var(--crimson)' }} />
-            <p style={{ fontSize: 15 }}>Searching Scryfall...</p>
+          <div className="flex flex-col items-center py-20 gap-4 text-ink-muted">
+            <Loader size={32} className="animate-spin text-crimson" />
+            <p className="text-[15px]">Searching Scryfall...</p>
           </div>
         )}
 
         {error && (
-          <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 12, padding: '16px 20px', color: '#991B1B', fontSize: 14 }}>
+          <div className="bg-[#FEE2E2] border border-[#FCA5A5] rounded-xl px-5 py-4 text-[#991B1B] text-sm">
             {error}
           </div>
         )}
 
         {!loading && !error && cards.length === 0 && q && (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-            <p style={{ fontSize: 18, marginBottom: 8 }}>No cards found for &quot;{q}&quot;</p>
-            <p style={{ fontSize: 14 }}>Try a different search term or check spelling</p>
+          <div className="text-center py-20 text-ink-muted">
+            <p className="text-lg mb-2">No cards found for &quot;{q}&quot;</p>
+            <p className="text-sm">Try a different search term or check spelling</p>
           </div>
         )}
 

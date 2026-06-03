@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Card Pricy
+
+A Magic: The Gathering card price lookup tool built with Next.js. Search for any card, compare prices across vendors, and build a list with a running total.
+
+## Features
+
+- **Card search** — search by name with live autocomplete powered by Scryfall
+- **Bulk search** — paste a list of card names (one per line, optional `N cardname` quantity prefix) to resolve many cards at once
+- **Exact printing lookup** — find a specific printing with the `CardName (SET) 123 [F]` syntax (set code, collector number, optional foil flag)
+- **Price comparison** — NM, Played, and Damaged prices from TCGPlayer (USD) and Cardmarket (EUR) via Scryfall
+- **Currency display** — toggle between CAD, USD, and EUR in the navbar
+- **Card list** — add cards with condition, finish, and optionally a custom price; view a running total, copy the list as text, or export as CSV
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build   # production build
+npm run lint    # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Data
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All card data and prices come from the [Scryfall API](https://scryfall.com/docs/api) (free, no API key required). Prices are sourced from TCGPlayer (USD) and Cardmarket (EUR); Played and Damaged prices are estimated at 75% and 40% of NM respectively. Currency conversion uses fixed exchange rates defined in `lib/currency.ts`.
