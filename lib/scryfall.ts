@@ -339,7 +339,12 @@ export async function scryfallBulkSearch(names: string[]): Promise<{ found: MTGC
         if (exactCard) {
           found.push(scryfallToCard(exactCard));
         } else {
-          missing.push(requestedName);
+          const fallbackCard = await scryfallGetByExactName(requestedName);
+          if (fallbackCard) {
+            found.push(fallbackCard);
+          } else {
+            missing.push(requestedName);
+          }
         }
       }
     } catch {
