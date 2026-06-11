@@ -4,6 +4,10 @@
 import { MTGCard, VendorPrice, CardLegality } from './types';
 
 const BASE = 'https://api.scryfall.com';
+const SCRYFALL_HEADERS = {
+  Accept: 'application/json',
+  'User-Agent': 'Card Pricy/0.1',
+};
 
 interface ScryfallPriceMap {
   usd?: string | null;
@@ -68,7 +72,10 @@ async function rateLimitedFetch(url: string): Promise<Response> {
   const gap = now - lastCall;
   if (gap < 100) await new Promise(r => setTimeout(r, 100 - gap));
   lastCall = Date.now();
-  const res = await fetch(url, { next: { revalidate: 300 } }); // cache 5min
+  const res = await fetch(url, {
+    headers: SCRYFALL_HEADERS,
+    next: { revalidate: 300 },
+  }); // cache 5min
   return res;
 }
 
@@ -317,7 +324,10 @@ export async function scryfallBulkSearch(names: string[]): Promise<{ found: MTGC
       const identifiers = chunk.map(name => ({ name }));
       const res = await fetch(`${BASE}/cards/collection`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          ...SCRYFALL_HEADERS,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ identifiers }),
         next: { revalidate: 300 },
       });
